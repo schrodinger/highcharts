@@ -42,7 +42,8 @@ Highcharts.PlotLineOrBand.prototype = {
 			zIndex = options.zIndex,
 			events = options.events,
 			attribs = {},
-			renderer = axis.chart.renderer;
+			renderer = axis.chart.renderer,
+			log2lin = axis.log2lin;
 
 		// logarithmic conversion
 		if (axis.isLog) {
