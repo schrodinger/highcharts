@@ -219,13 +219,6 @@ function isNumber(n) {
 	return typeof n === 'number';
 }
 
-function log2lin(num) {
-	return math.log(num) / math.LN10;
-}
-function lin2log(num) {
-	return math.pow(10, num);
-}
-
 /**
  * Remove last occurence of an item from an array
  * @param {Array} arr
@@ -5921,7 +5914,7 @@ Tick.prototype = {
 			isFirst: isFirst,
 			isLast: isLast,
 			dateTimeLabelFormat: dateTimeLabelFormat,
-			value: axis.isLog ? correctFloat(lin2log(value)) : value
+			value: axis.isLog ? correctFloat(axis.lin2log(value)) : value
 		});
 
 		// prepare CSS
@@ -6276,7 +6269,8 @@ Highcharts.PlotLineOrBand.prototype = {
 			zIndex = options.zIndex,
 			events = options.events,
 			attribs = {},
-			renderer = axis.chart.renderer;
+			renderer = axis.chart.renderer,
+			log2lin = axis.log2lin;
 
 		// logarithmic conversion
 		if (axis.isLog) {
@@ -6847,8 +6841,8 @@ Axis.prototype = {
 
 		// extend logarithmic axis
 		if (axis.isLog) {
-			axis.val2lin = log2lin;
-			axis.lin2val = lin2log;
+			axis.val2lin = axis.log2lin;
+			axis.lin2val = axis.lin2log;
 		}
 	},
 
@@ -7381,6 +7375,7 @@ Axis.prototype = {
 			chart = axis.chart,
 			options = axis.options,
 			isLog = axis.isLog,
+			log2lin = axis.log2lin,
 			isDatetimeAxis = axis.isDatetimeAxis,
 			isXAxis = axis.isXAxis,
 			isLinked = axis.isLinked,
@@ -7937,7 +7932,8 @@ Axis.prototype = {
 	 */
 	getExtremes: function () {
 		var axis = this,
-			isLog = axis.isLog;
+			isLog = axis.isLog,
+			lin2log = axis.lin2log;
 
 		return {
 			min: isLog ? correctFloat(lin2log(axis.min)) : axis.min,
@@ -7956,6 +7952,7 @@ Axis.prototype = {
 	getThreshold: function (threshold) {
 		var axis = this,
 			isLog = axis.isLog,
+			lin2log = axis.lin2log,
 			realMin = isLog ? lin2log(axis.min) : axis.min,
 			realMax = isLog ? lin2log(axis.max) : axis.max;
 
@@ -8389,6 +8386,7 @@ Axis.prototype = {
 			renderer = chart.renderer,
 			options = axis.options,
 			isLog = axis.isLog,
+			lin2log = axis.lin2log,
 			isLinked = axis.isLinked,
 			tickPositions = axis.tickPositions,
 			axisTitle = axis.axisTitle,			
@@ -8932,6 +8930,8 @@ Axis.prototype.getLogTickPositions = function (interval, min, max, minor) {
 	var axis = this,
 		options = axis.options,
 		axisLength = axis.len,
+		lin2log = axis.lin2log,
+		log2lin = axis.log2lin,
 		// Since we use this method for both major and minor ticks,
 		// use a local variable and return the result
 		positions = []; 
@@ -9020,7 +9020,16 @@ Axis.prototype.getLogTickPositions = function (interval, min, max, minor) {
 		axis.tickInterval = interval;
 	}
 	return positions;
-};/**
+};
+
+Axis.prototype.log2lin = function (num) {
+	return math.log(num) / math.LN10;
+};
+
+Axis.prototype.lin2log = function (num) {
+	return math.pow(10, num);
+};
+/**
  * The tooltip object
  * @param {Object} chart The chart instance
  * @param {Object} options Tooltip options
