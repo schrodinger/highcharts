@@ -41,9 +41,15 @@ Highcharts.Chart.prototype.exportChartLocal = function (exportingOptions, chartO
 		// All callbacks receive two arguments: imageURL, and callbackArgs. callbackArgs is used only by callbacks and can contain whatever.
 		imageToDataUrl = function (imageURL, callbackArgs, successCallback, taintedCallback, noCanvasSupportCallback, failedLoadCallback, finallyCallback) {
 			var img = new Image();
-			if (!webKit) {
-				img.crossOrigin = 'Anonymous'; // For some reason Safari chokes on this attribute
-			}
+			/*
+			 * NOTE (ext_stackwave_steich) The following if branch was causing IE11
+			 * exports to fail. While setting crossOrigin to 'Anonymous' might help
+			 * in Safari, it causes a tainted canvas in IE11, which highcharts then tries
+			 * to remedy by falling back to the export server.
+			 */
+			// if (!webKit) {
+			// 	img.crossOrigin = 'Anonymous'; // For some reason Safari chokes on this attribute
+			// }
 			img.onload = function () {
 				var canvas = document.createElement('canvas'),
 					ctx = canvas.getContext && canvas.getContext('2d'),
@@ -150,7 +156,7 @@ Highcharts.Chart.prototype.exportChartLocal = function (exportingOptions, chartO
 				}
 			} else {
 				// PNG download - create bitmap from SVG
-				
+
 				// First, try to get PNG by rendering on canvas
 				svgurl = svgToDataUrl(svg);
 				imageToDataUrl(svgurl, { /* args */ }, function (imageURL) {
@@ -241,7 +247,7 @@ Highcharts.Chart.prototype.exportChartLocal = function (exportingOptions, chartO
 				embeddedSuccess,
 				// Tainted canvas
 				fallbackToExportServer,
-				// No canvas support 
+				// No canvas support
 				fallbackToExportServer,
 				// Failed to load source
 				fallbackToExportServer
